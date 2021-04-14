@@ -67,6 +67,8 @@ class RemoteObject:
     type_: str
 
     #: Object subtype hint. Specified for ``object`` type values only.
+    #: NOTE: If you change anything here, make sure to also update
+    #: ``subtype`` in ``ObjectPreview`` and ``PropertyPreview`` below.
     subtype: typing.Optional[str] = None
 
     #: Object class (constructor) name. Specified for ``object`` type values only.
@@ -374,19 +376,34 @@ class PrivatePropertyDescriptor:
     name: str
 
     #: The value associated with the private property.
-    value: RemoteObject
+    value: typing.Optional[RemoteObject] = None
+
+    #: A function which serves as a getter for the private property,
+    #: or ``undefined`` if there is no getter (accessor descriptors only).
+    get: typing.Optional[RemoteObject] = None
+
+    #: A function which serves as a setter for the private property,
+    #: or ``undefined`` if there is no setter (accessor descriptors only).
+    set_: typing.Optional[RemoteObject] = None
 
     def to_json(self) -> T_JSON_DICT:
         json: T_JSON_DICT = dict()
         json['name'] = self.name
-        json['value'] = self.value.to_json()
+        if self.value is not None:
+            json['value'] = self.value.to_json()
+        if self.get is not None:
+            json['get'] = self.get.to_json()
+        if self.set_ is not None:
+            json['set'] = self.set_.to_json()
         return json
 
     @classmethod
     def from_json(cls, json: T_JSON_DICT) -> PrivatePropertyDescriptor:
         return cls(
             name=str(json['name']),
-            value=RemoteObject.from_json(json['value']),
+            value=RemoteObject.from_json(json['value']) if 'value' in json else None,
+            get=RemoteObject.from_json(json['get']) if 'get' in json else None,
+            set_=RemoteObject.from_json(json['set']) if 'set' in json else None,
         )
 
 
@@ -454,6 +471,11 @@ class ExecutionContextDescription:
     #: Human readable name describing given context.
     name: str
 
+    #: A system-unique execution context identifier. Unlike the id, this is unique accross
+    #: multiple processes, so can be reliably used to identify specific context while backend
+    #: performs a cross-process navigation.
+    unique_id: str
+
     #: Embedder-specific auxiliary data.
     aux_data: typing.Optional[dict] = None
 
@@ -462,6 +484,7 @@ class ExecutionContextDescription:
         json['id'] = self.id_.to_json()
         json['origin'] = self.origin
         json['name'] = self.name
+        json['uniqueId'] = self.unique_id
         if self.aux_data is not None:
             json['auxData'] = self.aux_data
         return json
@@ -472,6 +495,7 @@ class ExecutionContextDescription:
             id_=ExecutionContextId.from_json(json['id']),
             origin=str(json['origin']),
             name=str(json['name']),
+            unique_id=str(json['uniqueId']),
             aux_data=dict(json['auxData']) if 'auxData' in json else None,
         )
 
@@ -864,7 +888,11 @@ def evaluate(
         user_gesture: typing.Optional[bool] = None,
         await_promise: typing.Optional[bool] = None,
         throw_on_side_effect: typing.Optional[bool] = None,
-        timeout: typing.Optional[TimeDelta] = None
+        timeout: typing.Optional[TimeDelta] = None,
+        disable_breaks: typing.Optional[bool] = None,
+        repl_mode: typing.Optional[bool] = None,
+        allow_unsafe_eval_blocked_by_csp: typing.Optional[bool] = None,
+        unique_context_id: typing.Optional[str] = None
     ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.Tuple[RemoteObject, typing.Optional[ExceptionDetails]]]:
     '''
     Evaluates expression on global object.
@@ -873,13 +901,17 @@ def evaluate(
     :param object_group: *(Optional)* Symbolic group name that can be used to release multiple objects.
     :param include_command_line_api: *(Optional)* Determines whether Command Line API should be available during the evaluation.
     :param silent: *(Optional)* In silent mode exceptions thrown during evaluation are not reported and do not pause execution. Overrides ```setPauseOnException```` state.
-    :param context_id: *(Optional)* Specifies in which execution context to perform evaluation. If the parameter is omitted the evaluation will be performed in the context of the inspected page.
+    :param context_id: *(Optional)* Specifies in which execution context to perform evaluation. If the parameter is omitted the evaluation will be performed in the context of the inspected page. This is mutually exclusive with ````uniqueContextId````, which offers an alternative way to identify the execution context that is more reliable in a multi-process environment.
     :param return_by_value: *(Optional)* Whether the result is expected to be a JSON object that should be sent by value.
     :param generate_preview: **(EXPERIMENTAL)** *(Optional)* Whether preview should be generated for the result.
     :param user_gesture: *(Optional)* Whether execution should be treated as initiated by user in the UI.
-    :param await_promise: *(Optional)* Whether execution should ````await``` for resulting value and return once awaited promise is resolved.
-    :param throw_on_side_effect: **(EXPERIMENTAL)** *(Optional)* Whether to throw an exception if side effect cannot be ruled out during evaluation.
+    :param await_promise: *(Optional)* Whether execution should ````await```` for resulting value and return once awaited promise is resolved.
+    :param throw_on_side_effect: **(EXPERIMENTAL)** *(Optional)* Whether to throw an exception if side effect cannot be ruled out during evaluation. This implies ````disableBreaks```` below.
     :param timeout: **(EXPERIMENTAL)** *(Optional)* Terminate execution after timing out (number of milliseconds).
+    :param disable_breaks: **(EXPERIMENTAL)** *(Optional)* Disable breakpoints during execution.
+    :param repl_mode: **(EXPERIMENTAL)** *(Optional)* Setting this flag to true enables ````let```` re-declaration and top-level ````await````. Note that ````let```` variables can only be re-declared if they originate from ````replMode```` themselves.
+    :param allow_unsafe_eval_blocked_by_csp: **(EXPERIMENTAL)** *(Optional)* The Content Security Policy (CSP) for the target might block 'unsafe-eval' which includes eval(), Function(), setTimeout() and setInterval() when called with non-callable arguments. This flag bypasses CSP for this evaluation and allows unsafe-eval. Defaults to true.
+    :param unique_context_id: **(EXPERIMENTAL)** *(Optional)* An alternative way to specify the execution context to evaluate in. Compared to contextId that may be reused accross processes, this is guaranteed to be system-unique, so it can be used to prevent accidental evaluation of the expression in context different than intended (e.g. as a result of navigation accross process boundaries). This is mutually exclusive with ````contextId```.
     :returns: A tuple with the following items:
 
         0. **result** - Evaluation result.
@@ -907,6 +939,14 @@ def evaluate(
         params['throwOnSideEffect'] = throw_on_side_effect
     if timeout is not None:
         params['timeout'] = timeout.to_json()
+    if disable_breaks is not None:
+        params['disableBreaks'] = disable_breaks
+    if repl_mode is not None:
+        params['replMode'] = repl_mode
+    if allow_unsafe_eval_blocked_by_csp is not None:
+        params['allowUnsafeEvalBlockedByCSP'] = allow_unsafe_eval_blocked_by_csp
+    if unique_context_id is not None:
+        params['uniqueContextId'] = unique_context_id
     cmd_dict: T_JSON_DICT = {
         'method': 'Runtime.evaluate',
         'params': params,
@@ -1205,14 +1245,13 @@ def terminate_execution() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,None]:
 
 def add_binding(
         name: str,
-        execution_context_id: typing.Optional[ExecutionContextId] = None
+        execution_context_id: typing.Optional[ExecutionContextId] = None,
+        execution_context_name: typing.Optional[str] = None
     ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,None]:
     '''
     If executionContextId is empty, adds binding with the given name on the
     global objects of all inspected contexts, including those created later,
     bindings survive reloads.
-    If executionContextId is specified, adds binding only on global object of
-    given execution context.
     Binding function takes exactly one argument, this argument should be string,
     in case of any other input, function throws an exception.
     Each binding function call produces Runtime.bindingCalled notification.
@@ -1220,12 +1259,15 @@ def add_binding(
     **EXPERIMENTAL**
 
     :param name:
-    :param execution_context_id: *(Optional)*
+    :param execution_context_id: *(Optional)* If specified, the binding would only be exposed to the specified execution context. If omitted and ```executionContextName```` is not set, the binding is exposed to all execution contexts of the target. This parameter is mutually exclusive with ````executionContextName````.
+    :param execution_context_name: **(EXPERIMENTAL)** *(Optional)* If specified, the binding is exposed to the executionContext with matching name, even for contexts created after the binding is added. See also ````ExecutionContext.name```` and ````worldName```` parameter to ````Page.addScriptToEvaluateOnNewDocument````. This parameter is mutually exclusive with ````executionContextId```.
     '''
     params: T_JSON_DICT = dict()
     params['name'] = name
     if execution_context_id is not None:
         params['executionContextId'] = execution_context_id.to_json()
+    if execution_context_name is not None:
+        params['executionContextName'] = execution_context_name
     cmd_dict: T_JSON_DICT = {
         'method': 'Runtime.addBinding',
         'params': params,

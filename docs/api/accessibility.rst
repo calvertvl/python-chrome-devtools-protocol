@@ -83,9 +83,13 @@ to. For more information, see
 
 .. autofunction:: enable
 
+.. autofunction:: get_child_ax_nodes
+
 .. autofunction:: get_full_ax_tree
 
 .. autofunction:: get_partial_ax_tree
+
+.. autofunction:: query_ax_tree
 
 Events
 ------

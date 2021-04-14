@@ -3,7 +3,7 @@
 # This file is generated from the CDP specification. If you need to make
 # changes, edit the generator and regenerate all of the modules.
 #
-# CDP domain: Fetch (experimental)
+# CDP domain: Fetch
 
 from __future__ import annotations
 from cdp.util import event_class, T_JSON_DICT
@@ -230,7 +230,8 @@ def fail_request(
 def fulfill_request(
         request_id: RequestId,
         response_code: int,
-        response_headers: typing.List[HeaderEntry],
+        response_headers: typing.Optional[typing.List[HeaderEntry]] = None,
+        binary_response_headers: typing.Optional[str] = None,
         body: typing.Optional[str] = None,
         response_phrase: typing.Optional[str] = None
     ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,None]:
@@ -239,14 +240,18 @@ def fulfill_request(
 
     :param request_id: An id the client received in requestPaused event.
     :param response_code: An HTTP response code.
-    :param response_headers: Response headers.
-    :param body: *(Optional)* A response body.
-    :param response_phrase: *(Optional)* A textual representation of responseCode. If absent, a standard phrase mathcing responseCode is used.
+    :param response_headers: *(Optional)* Response headers.
+    :param binary_response_headers: *(Optional)* Alternative way of specifying response headers as a \0-separated series of name: value pairs. Prefer the above method unless you need to represent some non-UTF8 values that can't be transmitted over the protocol as text. (Encoded as a base64 string when passed over JSON)
+    :param body: *(Optional)* A response body. (Encoded as a base64 string when passed over JSON)
+    :param response_phrase: *(Optional)* A textual representation of responseCode. If absent, a standard phrase matching responseCode is used.
     '''
     params: T_JSON_DICT = dict()
     params['requestId'] = request_id.to_json()
     params['responseCode'] = response_code
-    params['responseHeaders'] = [i.to_json() for i in response_headers]
+    if response_headers is not None:
+        params['responseHeaders'] = [i.to_json() for i in response_headers]
+    if binary_response_headers is not None:
+        params['binaryResponseHeaders'] = binary_response_headers
     if body is not None:
         params['body'] = body
     if response_phrase is not None:
@@ -271,8 +276,8 @@ def continue_request(
     :param request_id: An id the client received in requestPaused event.
     :param url: *(Optional)* If set, the request url will be modified in a way that's not observable by page.
     :param method: *(Optional)* If set, the request method is overridden.
-    :param post_data: *(Optional)* If set, overrides the post data in the request.
-    :param headers: *(Optional)* If set, overrides the request headrts.
+    :param post_data: *(Optional)* If set, overrides the post data in the request. (Encoded as a base64 string when passed over JSON)
+    :param headers: *(Optional)* If set, overrides the request headers.
     '''
     params: T_JSON_DICT = dict()
     params['requestId'] = request_id.to_json()

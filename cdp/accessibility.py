@@ -88,6 +88,7 @@ class AXValueNativeSourceType(enum.Enum):
     LABELFOR = "labelfor"
     LABELWRAPPED = "labelwrapped"
     LEGEND = "legend"
+    RUBYANNOTATION = "rubyannotation"
     TABLECAPTION = "tablecaption"
     TITLE = "title"
     OTHER = "other"
@@ -442,16 +443,87 @@ def get_partial_ax_tree(
     return [AXNode.from_json(i) for i in json['nodes']]
 
 
-def get_full_ax_tree() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.List[AXNode]]:
+def get_full_ax_tree(
+        max_depth: typing.Optional[int] = None
+    ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.List[AXNode]]:
     '''
-    Fetches the entire accessibility tree
+    Fetches the entire accessibility tree for the root Document
 
     **EXPERIMENTAL**
 
+    :param max_depth: *(Optional)* The maximum depth at which descendants of the root node should be retrieved. If omitted, the full tree is returned.
     :returns: 
     '''
+    params: T_JSON_DICT = dict()
+    if max_depth is not None:
+        params['max_depth'] = max_depth
     cmd_dict: T_JSON_DICT = {
         'method': 'Accessibility.getFullAXTree',
+        'params': params,
+    }
+    json = yield cmd_dict
+    return [AXNode.from_json(i) for i in json['nodes']]
+
+
+def get_child_ax_nodes(
+        id_: AXNodeId
+    ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.List[AXNode]]:
+    '''
+    Fetches a particular accessibility node by AXNodeId.
+    Requires ``enable()`` to have been called previously.
+
+    **EXPERIMENTAL**
+
+    :param id_:
+    :returns: 
+    '''
+    params: T_JSON_DICT = dict()
+    params['id'] = id_.to_json()
+    cmd_dict: T_JSON_DICT = {
+        'method': 'Accessibility.getChildAXNodes',
+        'params': params,
+    }
+    json = yield cmd_dict
+    return [AXNode.from_json(i) for i in json['nodes']]
+
+
+def query_ax_tree(
+        node_id: typing.Optional[dom.NodeId] = None,
+        backend_node_id: typing.Optional[dom.BackendNodeId] = None,
+        object_id: typing.Optional[runtime.RemoteObjectId] = None,
+        accessible_name: typing.Optional[str] = None,
+        role: typing.Optional[str] = None
+    ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.List[AXNode]]:
+    '''
+    Query a DOM node's accessibility subtree for accessible name and role.
+    This command computes the name and role for all nodes in the subtree, including those that are
+    ignored for accessibility, and returns those that mactch the specified name and role. If no DOM
+    node is specified, or the DOM node does not exist, the command returns an error. If neither
+    ``accessibleName`` or ``role`` is specified, it returns all the accessibility nodes in the subtree.
+
+    **EXPERIMENTAL**
+
+    :param node_id: *(Optional)* Identifier of the node for the root to query.
+    :param backend_node_id: *(Optional)* Identifier of the backend node for the root to query.
+    :param object_id: *(Optional)* JavaScript object id of the node wrapper for the root to query.
+    :param accessible_name: *(Optional)* Find nodes with this computed name.
+    :param role: *(Optional)* Find nodes with this computed role.
+    :returns: A list of ``Accessibility.AXNode`` matching the specified attributes, including nodes that are ignored for accessibility.
+    '''
+    params: T_JSON_DICT = dict()
+    if node_id is not None:
+        params['nodeId'] = node_id.to_json()
+    if backend_node_id is not None:
+        params['backendNodeId'] = backend_node_id.to_json()
+    if object_id is not None:
+        params['objectId'] = object_id.to_json()
+    if accessible_name is not None:
+        params['accessibleName'] = accessible_name
+    if role is not None:
+        params['role'] = role
+    cmd_dict: T_JSON_DICT = {
+        'method': 'Accessibility.queryAXTree',
+        'params': params,
     }
     json = yield cmd_dict
     return [AXNode.from_json(i) for i in json['nodes']]

@@ -1,11 +1,11 @@
-SystemInfo
-==========
+Media
+=====
 
-The SystemInfo domain defines methods and events for querying low-level system information.
+This domain allows detailed inspection of media elements
 
 *This CDP domain is experimental.*
 
-.. module:: cdp.system_info
+.. module:: cdp.media
 
 * Types_
 * Commands_
@@ -19,47 +19,32 @@ yourself. Instead, the API creates objects for you as return
 values from commands, and then you can use those objects as
 arguments to other commands.
 
-.. autoclass:: GPUDevice
+.. autoclass:: PlayerId
       :members:
       :undoc-members:
       :exclude-members: from_json, to_json
 
-.. autoclass:: Size
+.. autoclass:: Timestamp
       :members:
       :undoc-members:
       :exclude-members: from_json, to_json
 
-.. autoclass:: VideoDecodeAcceleratorCapability
+.. autoclass:: PlayerMessage
       :members:
       :undoc-members:
       :exclude-members: from_json, to_json
 
-.. autoclass:: VideoEncodeAcceleratorCapability
+.. autoclass:: PlayerProperty
       :members:
       :undoc-members:
       :exclude-members: from_json, to_json
 
-.. autoclass:: SubsamplingFormat
+.. autoclass:: PlayerEvent
       :members:
       :undoc-members:
       :exclude-members: from_json, to_json
 
-.. autoclass:: ImageType
-      :members:
-      :undoc-members:
-      :exclude-members: from_json, to_json
-
-.. autoclass:: ImageDecodeAcceleratorCapability
-      :members:
-      :undoc-members:
-      :exclude-members: from_json, to_json
-
-.. autoclass:: GPUInfo
-      :members:
-      :undoc-members:
-      :exclude-members: from_json, to_json
-
-.. autoclass:: ProcessInfo
+.. autoclass:: PlayerError
       :members:
       :undoc-members:
       :exclude-members: from_json, to_json
@@ -76,11 +61,38 @@ commands, and ``z`` is the return type you should pay attention
 to. For more information, see
 :ref:`Getting Started: Commands <getting-started-commands>`.
 
-.. autofunction:: get_info
+.. autofunction:: disable
 
-.. autofunction:: get_process_info
+.. autofunction:: enable
 
 Events
 ------
 
-*There are no events in this module.*
+Generally, you do not need to instantiate CDP events
+yourself. Instead, the API creates events for you and then
+you use the event's attributes.
+
+.. autoclass:: PlayerPropertiesChanged
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
+.. autoclass:: PlayerEventsAdded
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
+.. autoclass:: PlayerMessagesLogged
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
+.. autoclass:: PlayerErrorsRaised
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
+.. autoclass:: PlayersCreated
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json

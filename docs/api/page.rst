@@ -22,6 +22,46 @@ arguments to other commands.
       :undoc-members:
       :exclude-members: from_json, to_json
 
+.. autoclass:: AdFrameType
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
+.. autoclass:: SecureContextType
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
+.. autoclass:: CrossOriginIsolatedContextType
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
+.. autoclass:: GatedAPIFeatures
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
+.. autoclass:: PermissionsPolicyFeature
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
+.. autoclass:: PermissionsPolicyBlockReason
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
+.. autoclass:: PermissionsPolicyBlockLocator
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
+.. autoclass:: PermissionsPolicyFeatureState
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
 .. autoclass:: Frame
       :members:
       :undoc-members:
@@ -72,6 +112,11 @@ arguments to other commands.
       :undoc-members:
       :exclude-members: from_json, to_json
 
+.. autoclass:: AppManifestParsedProperties
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
 .. autoclass:: LayoutViewport
       :members:
       :undoc-members:
@@ -98,6 +143,36 @@ arguments to other commands.
       :exclude-members: from_json, to_json
 
 .. autoclass:: ClientNavigationReason
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
+.. autoclass:: ClientNavigationDisposition
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
+.. autoclass:: InstallabilityErrorArgument
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
+.. autoclass:: InstallabilityError
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
+.. autoclass:: ReferrerPolicy
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
+.. autoclass:: CompilationCacheParams
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
+.. autoclass:: NavigationType
       :members:
       :undoc-members:
       :exclude-members: from_json, to_json
@@ -158,13 +233,15 @@ to. For more information, see
 
 .. autofunction:: get_layout_metrics
 
+.. autofunction:: get_manifest_icons
+
 .. autofunction:: get_navigation_history
+
+.. autofunction:: get_permissions_policy_state
 
 .. autofunction:: get_resource_content
 
 .. autofunction:: get_resource_tree
-
-.. autofunction:: handle_file_chooser
 
 .. autofunction:: handle_java_script_dialog
 
@@ -173,6 +250,8 @@ to. For more information, see
 .. autofunction:: navigate_to_history_entry
 
 .. autofunction:: print_to_pdf
+
+.. autofunction:: produce_compilation_cache
 
 .. autofunction:: reload
 
@@ -259,6 +338,11 @@ you use the event's attributes.
       :undoc-members:
       :exclude-members: from_json, to_json
 
+.. autoclass:: DocumentOpened
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
 .. autoclass:: FrameResized
       :members:
       :undoc-members:
@@ -285,6 +369,11 @@ you use the event's attributes.
       :exclude-members: from_json, to_json
 
 .. autoclass:: DownloadWillBegin
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
+.. autoclass:: DownloadProgress
       :members:
       :undoc-members:
       :exclude-members: from_json, to_json

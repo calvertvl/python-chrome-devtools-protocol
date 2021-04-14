@@ -200,6 +200,15 @@ class CSSStyleSheetHeader:
     #: document.written STYLE tags.
     is_inline: bool
 
+    #: Whether this stylesheet is mutable. Inline stylesheets become mutable
+    #: after they have been modified via CSSOM API.
+    #: <link> element's stylesheets become mutable only if DevTools modifies them.
+    #: Constructed stylesheets (new CSSStyleSheet()) are mutable immediately after creation.
+    is_mutable: bool
+
+    #: Whether this stylesheet is a constructed stylesheet (created using new CSSStyleSheet()).
+    is_constructed: bool
+
     #: Line offset of the stylesheet within the resource (zero based).
     start_line: float
 
@@ -208,6 +217,12 @@ class CSSStyleSheetHeader:
 
     #: Size of the content (in characters).
     length: float
+
+    #: Line offset of the end of the stylesheet within the resource (zero based).
+    end_line: float
+
+    #: Column offset of the end of the stylesheet within the resource (zero based).
+    end_column: float
 
     #: URL of source map associated with the stylesheet (if any).
     source_map_url: typing.Optional[str] = None
@@ -227,9 +242,13 @@ class CSSStyleSheetHeader:
         json['title'] = self.title
         json['disabled'] = self.disabled
         json['isInline'] = self.is_inline
+        json['isMutable'] = self.is_mutable
+        json['isConstructed'] = self.is_constructed
         json['startLine'] = self.start_line
         json['startColumn'] = self.start_column
         json['length'] = self.length
+        json['endLine'] = self.end_line
+        json['endColumn'] = self.end_column
         if self.source_map_url is not None:
             json['sourceMapURL'] = self.source_map_url
         if self.owner_node is not None:
@@ -248,9 +267,13 @@ class CSSStyleSheetHeader:
             title=str(json['title']),
             disabled=bool(json['disabled']),
             is_inline=bool(json['isInline']),
+            is_mutable=bool(json['isMutable']),
+            is_constructed=bool(json['isConstructed']),
             start_line=float(json['startLine']),
             start_column=float(json['startColumn']),
             length=float(json['length']),
+            end_line=float(json['endLine']),
+            end_column=float(json['endColumn']),
             source_map_url=str(json['sourceMapURL']) if 'sourceMapURL' in json else None,
             owner_node=dom.BackendNodeId.from_json(json['ownerNode']) if 'ownerNode' in json else None,
             has_source_url=bool(json['hasSourceURL']) if 'hasSourceURL' in json else None,
@@ -678,9 +701,50 @@ class PlatformFontUsage:
 
 
 @dataclass
+class FontVariationAxis:
+    '''
+    Information about font variation axes for variable fonts
+    '''
+    #: The font-variation-setting tag (a.k.a. "axis tag").
+    tag: str
+
+    #: Human-readable variation name in the default language (normally, "en").
+    name: str
+
+    #: The minimum value (inclusive) the font supports for this tag.
+    min_value: float
+
+    #: The maximum value (inclusive) the font supports for this tag.
+    max_value: float
+
+    #: The default value.
+    default_value: float
+
+    def to_json(self) -> T_JSON_DICT:
+        json: T_JSON_DICT = dict()
+        json['tag'] = self.tag
+        json['name'] = self.name
+        json['minValue'] = self.min_value
+        json['maxValue'] = self.max_value
+        json['defaultValue'] = self.default_value
+        return json
+
+    @classmethod
+    def from_json(cls, json: T_JSON_DICT) -> FontVariationAxis:
+        return cls(
+            tag=str(json['tag']),
+            name=str(json['name']),
+            min_value=float(json['minValue']),
+            max_value=float(json['maxValue']),
+            default_value=float(json['defaultValue']),
+        )
+
+
+@dataclass
 class FontFace:
     '''
     Properties of a web font: https://www.w3.org/TR/2008/REC-CSS2-20080411/fonts.html#font-descriptions
+    and additional information such as platformFontFamily and fontVariationAxes.
     '''
     #: The font-family.
     font_family: str
@@ -706,6 +770,9 @@ class FontFace:
     #: The resolved platform font family
     platform_font_family: str
 
+    #: Available variation settings (a.k.a. "axes").
+    font_variation_axes: typing.Optional[typing.List[FontVariationAxis]] = None
+
     def to_json(self) -> T_JSON_DICT:
         json: T_JSON_DICT = dict()
         json['fontFamily'] = self.font_family
@@ -716,6 +783,8 @@ class FontFace:
         json['unicodeRange'] = self.unicode_range
         json['src'] = self.src
         json['platformFontFamily'] = self.platform_font_family
+        if self.font_variation_axes is not None:
+            json['fontVariationAxes'] = [i.to_json() for i in self.font_variation_axes]
         return json
 
     @classmethod
@@ -729,6 +798,7 @@ class FontFace:
             unicode_range=str(json['unicodeRange']),
             src=str(json['src']),
             platform_font_family=str(json['platformFontFamily']),
+            font_variation_axes=[FontVariationAxis.from_json(i) for i in json['fontVariationAxes']] if 'fontVariationAxes' in json else None,
         )
 
 
@@ -1085,6 +1155,45 @@ def get_style_sheet_text(
     return str(json['text'])
 
 
+def track_computed_style_updates(
+        properties_to_track: typing.List[CSSComputedStyleProperty]
+    ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,None]:
+    '''
+    Starts tracking the given computed styles for updates. The specified array of properties
+    replaces the one previously specified. Pass empty array to disable tracking.
+    Use takeComputedStyleUpdates to retrieve the list of nodes that had properties modified.
+    The changes to computed style properties are only tracked for nodes pushed to the front-end
+    by the DOM agent. If no changes to the tracked properties occur after the node has been pushed
+    to the front-end, no updates will be issued for the node.
+
+    **EXPERIMENTAL**
+
+    :param properties_to_track:
+    '''
+    params: T_JSON_DICT = dict()
+    params['propertiesToTrack'] = [i.to_json() for i in properties_to_track]
+    cmd_dict: T_JSON_DICT = {
+        'method': 'CSS.trackComputedStyleUpdates',
+        'params': params,
+    }
+    json = yield cmd_dict
+
+
+def take_computed_style_updates() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.List[dom.NodeId]]:
+    '''
+    Polls the next batch of computed style updates.
+
+    **EXPERIMENTAL**
+
+    :returns: The list of node Ids that have their tracked computed styles updated
+    '''
+    cmd_dict: T_JSON_DICT = {
+        'method': 'CSS.takeComputedStyleUpdates',
+    }
+    json = yield cmd_dict
+    return [dom.NodeId.from_json(i) for i in json['nodeIds']]
+
+
 def set_effective_property_value_for_node(
         node_id: dom.NodeId,
         property_name: str,
@@ -1249,18 +1358,43 @@ def stop_rule_usage_tracking() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typin
     return [RuleUsage.from_json(i) for i in json['ruleUsage']]
 
 
-def take_coverage_delta() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.List[RuleUsage]]:
+def take_coverage_delta() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.Tuple[typing.List[RuleUsage], float]]:
     '''
     Obtain list of rules that became used since last call to this method (or since start of coverage
     instrumentation)
 
-    :returns: 
+    :returns: A tuple with the following items:
+
+        0. **coverage** - 
+        1. **timestamp** - Monotonically increasing time, in seconds.
     '''
     cmd_dict: T_JSON_DICT = {
         'method': 'CSS.takeCoverageDelta',
     }
     json = yield cmd_dict
-    return [RuleUsage.from_json(i) for i in json['coverage']]
+    return (
+        [RuleUsage.from_json(i) for i in json['coverage']],
+        float(json['timestamp'])
+    )
+
+
+def set_local_fonts_enabled(
+        enabled: bool
+    ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,None]:
+    '''
+    Enables/disables rendering of local CSS fonts (enabled by default).
+
+    **EXPERIMENTAL**
+
+    :param enabled: Whether rendering of local fonts is enabled.
+    '''
+    params: T_JSON_DICT = dict()
+    params['enabled'] = enabled
+    cmd_dict: T_JSON_DICT = {
+        'method': 'CSS.setLocalFontsEnabled',
+        'params': params,
+    }
+    json = yield cmd_dict
 
 
 @event_class('CSS.fontsUpdated')

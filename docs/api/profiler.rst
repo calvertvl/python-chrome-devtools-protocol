@@ -60,6 +60,16 @@ arguments to other commands.
       :undoc-members:
       :exclude-members: from_json, to_json
 
+.. autoclass:: CounterInfo
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
+.. autoclass:: RuntimeCallCounterInfo
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
 Commands
 --------
 
@@ -74,9 +84,21 @@ to. For more information, see
 
 .. autofunction:: disable
 
+.. autofunction:: disable_counters
+
+.. autofunction:: disable_runtime_call_stats
+
 .. autofunction:: enable
 
+.. autofunction:: enable_counters
+
+.. autofunction:: enable_runtime_call_stats
+
 .. autofunction:: get_best_effort_coverage
+
+.. autofunction:: get_counters
+
+.. autofunction:: get_runtime_call_stats
 
 .. autofunction:: set_sampling_interval
 
@@ -109,6 +131,11 @@ you use the event's attributes.
       :exclude-members: from_json, to_json
 
 .. autoclass:: ConsoleProfileStarted
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
+.. autoclass:: PreciseCoverageDeltaUpdate
       :members:
       :undoc-members:
       :exclude-members: from_json, to_json

@@ -25,7 +25,22 @@ arguments to other commands.
       :undoc-members:
       :exclude-members: from_json, to_json
 
+.. autoclass:: MouseButton
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
 .. autoclass:: TimeSinceEpoch
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
+.. autoclass:: DragDataItem
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
+.. autoclass:: DragData
       :members:
       :undoc-members:
       :exclude-members: from_json, to_json
@@ -42,6 +57,8 @@ commands, and ``z`` is the return type you should pay attention
 to. For more information, see
 :ref:`Getting Started: Commands <getting-started-commands>`.
 
+.. autofunction:: dispatch_drag_event
+
 .. autofunction:: dispatch_key_event
 
 .. autofunction:: dispatch_mouse_event
@@ -54,6 +71,8 @@ to. For more information, see
 
 .. autofunction:: set_ignore_input_events
 
+.. autofunction:: set_intercept_drags
+
 .. autofunction:: synthesize_pinch_gesture
 
 .. autofunction:: synthesize_scroll_gesture
@@ -63,4 +82,11 @@ to. For more information, see
 Events
 ------
 
-*There are no events in this module.*
+Generally, you do not need to instantiate CDP events
+yourself. Instead, the API creates events for you and then
+you use the event's attributes.
+
+.. autoclass:: DragIntercepted
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json

@@ -78,6 +78,11 @@ arguments to other commands.
       :undoc-members:
       :exclude-members: from_json, to_json
 
+.. autoclass:: CSSComputedStyleProperty
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json
+
 Commands
 --------
 
@@ -120,6 +125,10 @@ to. For more information, see
 
 .. autofunction:: get_node_for_location
 
+.. autofunction:: get_node_stack_traces
+
+.. autofunction:: get_nodes_for_subtree_by_style
+
 .. autofunction:: get_outer_html
 
 .. autofunction:: get_relayout_boundary
@@ -158,6 +167,8 @@ to. For more information, see
 
 .. autofunction:: resolve_node
 
+.. autofunction:: scroll_into_view_if_needed
+
 .. autofunction:: set_attribute_value
 
 .. autofunction:: set_attributes_as_text
@@ -167,6 +178,8 @@ to. For more information, see
 .. autofunction:: set_inspected_node
 
 .. autofunction:: set_node_name
+
+.. autofunction:: set_node_stack_traces_enabled
 
 .. autofunction:: set_node_value
 

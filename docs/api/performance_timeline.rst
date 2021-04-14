@@ -1,11 +1,12 @@
-SystemInfo
-==========
+PerformanceTimeline
+===================
 
-The SystemInfo domain defines methods and events for querying low-level system information.
+Reporting of performance timeline events, as specified in
+https://w3c.github.io/performance-timeline/#dom-performanceobserver.
 
 *This CDP domain is experimental.*
 
-.. module:: cdp.system_info
+.. module:: cdp.performance_timeline
 
 * Types_
 * Commands_
@@ -19,47 +20,22 @@ yourself. Instead, the API creates objects for you as return
 values from commands, and then you can use those objects as
 arguments to other commands.
 
-.. autoclass:: GPUDevice
+.. autoclass:: LargestContentfulPaint
       :members:
       :undoc-members:
       :exclude-members: from_json, to_json
 
-.. autoclass:: Size
+.. autoclass:: LayoutShiftAttribution
       :members:
       :undoc-members:
       :exclude-members: from_json, to_json
 
-.. autoclass:: VideoDecodeAcceleratorCapability
+.. autoclass:: LayoutShift
       :members:
       :undoc-members:
       :exclude-members: from_json, to_json
 
-.. autoclass:: VideoEncodeAcceleratorCapability
-      :members:
-      :undoc-members:
-      :exclude-members: from_json, to_json
-
-.. autoclass:: SubsamplingFormat
-      :members:
-      :undoc-members:
-      :exclude-members: from_json, to_json
-
-.. autoclass:: ImageType
-      :members:
-      :undoc-members:
-      :exclude-members: from_json, to_json
-
-.. autoclass:: ImageDecodeAcceleratorCapability
-      :members:
-      :undoc-members:
-      :exclude-members: from_json, to_json
-
-.. autoclass:: GPUInfo
-      :members:
-      :undoc-members:
-      :exclude-members: from_json, to_json
-
-.. autoclass:: ProcessInfo
+.. autoclass:: TimelineEvent
       :members:
       :undoc-members:
       :exclude-members: from_json, to_json
@@ -76,11 +52,16 @@ commands, and ``z`` is the return type you should pay attention
 to. For more information, see
 :ref:`Getting Started: Commands <getting-started-commands>`.
 
-.. autofunction:: get_info
-
-.. autofunction:: get_process_info
+.. autofunction:: enable
 
 Events
 ------
 
-*There are no events in this module.*
+Generally, you do not need to instantiate CDP events
+yourself. Instead, the API creates events for you and then
+you use the event's attributes.
+
+.. autoclass:: TimelineEventAdded
+      :members:
+      :undoc-members:
+      :exclude-members: from_json, to_json

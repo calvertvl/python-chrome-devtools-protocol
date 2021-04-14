@@ -3,8 +3,6 @@ Fetch
 
 A domain for letting clients substitute browser's network layer with client code.
 
-*This CDP domain is experimental.*
-
 .. module:: cdp.fetch
 
 * Types_

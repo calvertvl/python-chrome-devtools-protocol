@@ -298,6 +298,61 @@ class ScriptTypeProfile:
         )
 
 
+@dataclass
+class CounterInfo:
+    '''
+    Collected counter information.
+    '''
+    #: Counter name.
+    name: str
+
+    #: Counter value.
+    value: int
+
+    def to_json(self) -> T_JSON_DICT:
+        json: T_JSON_DICT = dict()
+        json['name'] = self.name
+        json['value'] = self.value
+        return json
+
+    @classmethod
+    def from_json(cls, json: T_JSON_DICT) -> CounterInfo:
+        return cls(
+            name=str(json['name']),
+            value=int(json['value']),
+        )
+
+
+@dataclass
+class RuntimeCallCounterInfo:
+    '''
+    Runtime call counter information.
+    '''
+    #: Counter name.
+    name: str
+
+    #: Counter value.
+    value: float
+
+    #: Counter time in seconds.
+    time: float
+
+    def to_json(self) -> T_JSON_DICT:
+        json: T_JSON_DICT = dict()
+        json['name'] = self.name
+        json['value'] = self.value
+        json['time'] = self.time
+        return json
+
+    @classmethod
+    def from_json(cls, json: T_JSON_DICT) -> RuntimeCallCounterInfo:
+        return cls(
+            name=str(json['name']),
+            value=float(json['value']),
+            time=float(json['time']),
+        )
+
+
 def disable() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,None]:
 
     cmd_dict: T_JSON_DICT = {
@@ -355,8 +410,9 @@ def start() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,None]:
 
 def start_precise_coverage(
         call_count: typing.Optional[bool] = None,
-        detailed: typing.Optional[bool] = None
-    ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,None]:
+        detailed: typing.Optional[bool] = None,
+        allow_triggered_updates: typing.Optional[bool] = None
+    ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,float]:
     '''
     Enable precise code coverage. Coverage data for JavaScript executed before enabling precise code
     coverage may be incomplete. Enabling prevents running optimized code and resets execution
@@ -364,17 +420,22 @@ def start_precise_coverage(
 
     :param call_count: *(Optional)* Collect accurate call counts beyond simple 'covered' or 'not covered'.
     :param detailed: *(Optional)* Collect block-based coverage.
+    :param allow_triggered_updates: *(Optional)* Allow the backend to send updates on its own initiative
+    :returns: Monotonically increasing time (in seconds) when the coverage update was taken in the backend.
     '''
     params: T_JSON_DICT = dict()
     if call_count is not None:
         params['callCount'] = call_count
     if detailed is not None:
         params['detailed'] = detailed
+    if allow_triggered_updates is not None:
+        params['allowTriggeredUpdates'] = allow_triggered_updates
     cmd_dict: T_JSON_DICT = {
         'method': 'Profiler.startPreciseCoverage',
         'params': params,
     }
     json = yield cmd_dict
+    return float(json['timestamp'])
 
 
 def start_type_profile() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,None]:
@@ -425,18 +486,24 @@ def stop_type_profile() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,None]:
     json = yield cmd_dict
 
 
-def take_precise_coverage() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.List[ScriptCoverage]]:
+def take_precise_coverage() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.Tuple[typing.List[ScriptCoverage], float]]:
     '''
     Collect coverage data for the current isolate, and resets execution counters. Precise code
     coverage needs to have started.
 
-    :returns: Coverage data for the current isolate.
+    :returns: A tuple with the following items:
+
+        0. **result** - Coverage data for the current isolate.
+        1. **timestamp** - Monotonically increasing time (in seconds) when the coverage update was taken in the backend.
     '''
     cmd_dict: T_JSON_DICT = {
         'method': 'Profiler.takePreciseCoverage',
     }
     json = yield cmd_dict
-    return [ScriptCoverage.from_json(i) for i in json['result']]
+    return (
+        [ScriptCoverage.from_json(i) for i in json['result']],
+        float(json['timestamp'])
+    )
 
 
 def take_type_profile() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.List[ScriptTypeProfile]]:
@@ -452,6 +519,84 @@ def take_type_profile() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.List[
     }
     json = yield cmd_dict
     return [ScriptTypeProfile.from_json(i) for i in json['result']]
+
+
+def enable_counters() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,None]:
+    '''
+    Enable counters collection.
+
+    **EXPERIMENTAL**
+    '''
+    cmd_dict: T_JSON_DICT = {
+        'method': 'Profiler.enableCounters',
+    }
+    json = yield cmd_dict
+
+
+def disable_counters() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,None]:
+    '''
+    Disable counters collection.
+
+    **EXPERIMENTAL**
+    '''
+    cmd_dict: T_JSON_DICT = {
+        'method': 'Profiler.disableCounters',
+    }
+    json = yield cmd_dict
+
+
+def get_counters() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.List[CounterInfo]]:
+    '''
+    Retrieve counters.
+
+    **EXPERIMENTAL**
+
+    :returns: Collected counters information.
+    '''
+    cmd_dict: T_JSON_DICT = {
+        'method': 'Profiler.getCounters',
+    }
+    json = yield cmd_dict
+    return [CounterInfo.from_json(i) for i in json['result']]
+
+
+def enable_runtime_call_stats() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,None]:
+    '''
+    Enable run time call stats collection.
+
+    **EXPERIMENTAL**
+    '''
+    cmd_dict: T_JSON_DICT = {
+        'method': 'Profiler.enableRuntimeCallStats',
+    }
+    json = yield cmd_dict
+
+
+def disable_runtime_call_stats() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,None]:
+    '''
+    Disable run time call stats collection.
+
+    **EXPERIMENTAL**
+    '''
+    cmd_dict: T_JSON_DICT = {
+        'method': 'Profiler.disableRuntimeCallStats',
+    }
+    json = yield cmd_dict
+
+
+def get_runtime_call_stats() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.List[RuntimeCallCounterInfo]]:
+    '''
+    Retrieve run time call stats.
+
+    **EXPERIMENTAL**
+
+    :returns: Collected runtime call counter information.
+    '''
+    cmd_dict: T_JSON_DICT = {
+        'method': 'Profiler.getRuntimeCallStats',
+    }
+    json = yield cmd_dict
+    return [RuntimeCallCounterInfo.from_json(i) for i in json['result']]
 
 
 @event_class('Profiler.consoleProfileFinished')
@@ -492,4 +637,31 @@ class ConsoleProfileStarted:
             id_=str(json['id']),
             location=debugger.Location.from_json(json['location']),
             title=str(json['title']) if 'title' in json else None
+        )
+
+
+@event_class('Profiler.preciseCoverageDeltaUpdate')
+@dataclass
+class PreciseCoverageDeltaUpdate:
+    '''
+    **EXPERIMENTAL**
+
+    Reports coverage delta since the last poll (either from an event like this, or from
+    ``takePreciseCoverage`` for the current isolate. May only be sent if precise code
+    coverage has been started. This event can be trigged by the embedder to, for example,
+    trigger collection of coverage data immediatelly at a certain point in time.
+    '''
+    #: Monotonically increasing time (in seconds) when the coverage update was taken in the backend.
+    timestamp: float
+    #: Identifier for distinguishing coverage events.
+    occassion: str
+    #: Coverage data for the current isolate.
+    result: typing.List[ScriptCoverage]
+
+    @classmethod
+    def from_json(cls, json: T_JSON_DICT) -> PreciseCoverageDeltaUpdate:
+        return cls(
+            timestamp=float(json['timestamp']),
+            occassion=str(json['occassion']),
+            result=[ScriptCoverage.from_json(i) for i in json['result']]
         )
