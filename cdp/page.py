@@ -975,21 +975,6 @@ class CompilationCacheParams:
         )
 
 
-class NavigationType(enum.Enum):
-    '''
-    The type of a frameNavigated event.
-    '''
-    NAVIGATION = "Navigation"
-    BACK_FORWARD_CACHE_RESTORE = "BackForwardCacheRestore"
-
-    def to_json(self) -> str:
-        return self.value
-
-    @classmethod
-    def from_json(cls, json: str) -> NavigationType:
-        return cls(json)
-
-
 @deprecated(version="1.3")
 def add_script_to_evaluate_on_load(
         script_source: str
@@ -1053,7 +1038,7 @@ def capture_screenshot(
         clip: typing.Optional[Viewport] = None,
         from_surface: typing.Optional[bool] = None,
         capture_beyond_viewport: typing.Optional[bool] = None
-    ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,str]:
+    ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,bytes]:
     '''
     Capture page screenshot.
 
@@ -1062,7 +1047,7 @@ def capture_screenshot(
     :param clip: *(Optional)* Capture the screenshot of a given region only.
     :param from_surface: **(EXPERIMENTAL)** *(Optional)* Capture the screenshot from the surface, rather than the view. Defaults to true.
     :param capture_beyond_viewport: **(EXPERIMENTAL)** *(Optional)* Capture the screenshot beyond the viewport. Defaults to false.
-    :returns: Base64-encoded image data. (Encoded as a base64 string when passed over JSON)
+    :returns: Base64-encoded image data.
     '''
     params: T_JSON_DICT = dict()
     if format_ is not None:
@@ -1080,7 +1065,7 @@ def capture_screenshot(
         'params': params,
     }
     json = yield cmd_dict
-    return str(json['data'])
+    return bytes(json['data'])
 
 
 def capture_snapshot(
@@ -1259,7 +1244,7 @@ def get_installability_errors() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typi
     return [InstallabilityError.from_json(i) for i in json['installabilityErrors']]
 
 
-def get_manifest_icons() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.Optional[str]]:
+def get_manifest_icons() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.Optional[bytes]]:
     '''
 
 
@@ -1271,7 +1256,7 @@ def get_manifest_icons() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.Opti
         'method': 'Page.getManifestIcons',
     }
     json = yield cmd_dict
-    return str(json['primaryIcon']) if 'primaryIcon' in json else None
+    return bytes(json['primaryIcon']) if 'primaryIcon' in json else None
 
 
 @deprecated(version="1.3")
@@ -1505,7 +1490,7 @@ def print_to_pdf(
         footer_template: typing.Optional[str] = None,
         prefer_css_page_size: typing.Optional[bool] = None,
         transfer_mode: typing.Optional[str] = None
-    ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.Tuple[str, typing.Optional[io.StreamHandle]]]:
+    ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.Tuple[bytes, typing.Optional[io.StreamHandle]]]:
     '''
     Print page as PDF.
 
@@ -1527,7 +1512,7 @@ def print_to_pdf(
     :param transfer_mode: **(EXPERIMENTAL)** *(Optional)* return as stream
     :returns: A tuple with the following items:
 
-        0. **data** - Base64-encoded pdf data. Empty if `` returnAsStream` is specified. (Encoded as a base64 string when passed over JSON)
+        0. **data** - Base64-encoded pdf data. Empty if `` returnAsStream` is specified.
         1. **stream** - *(Optional)* A handle of the stream that holds resulting PDF data.
     '''
     params: T_JSON_DICT = dict()
@@ -1569,7 +1554,7 @@ def print_to_pdf(
     }
     json = yield cmd_dict
     return (
-        str(json['data']),
+        bytes(json['data']),
         io.StreamHandle.from_json(json['stream']) if 'stream' in json else None
     )
 
@@ -2152,7 +2137,7 @@ def produce_compilation_cache(
 
 def add_compilation_cache(
         url: str,
-        data: str
+        data: bytes
     ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,None]:
     '''
     Seeds compilation cache for given url. Compilation cache does not survive
@@ -2161,7 +2146,7 @@ def add_compilation_cache(
     **EXPERIMENTAL**
 
     :param url:
-    :param data: Base64-encoded data (Encoded as a base64 string when passed over JSON)
+    :param data: Base64-encoded data
     '''
     params: T_JSON_DICT = dict()
     params['url'] = url
@@ -2340,13 +2325,11 @@ class FrameNavigated:
     '''
     #: Frame object.
     frame: Frame
-    type_: NavigationType
 
     @classmethod
     def from_json(cls, json: T_JSON_DICT) -> FrameNavigated:
         return cls(
-            frame=Frame.from_json(json['frame']),
-            type_=NavigationType.from_json(json['type'])
+            frame=Frame.from_json(json['frame'])
         )
 
 
@@ -2679,8 +2662,8 @@ class ScreencastFrame:
 
     Compressed image data requested by the ``startScreencast``.
     '''
-    #: Base64-encoded compressed image. (Encoded as a base64 string when passed over JSON)
-    data: str
+    #: Base64-encoded compressed image.
+    data: bytes
     #: Screencast frame metadata.
     metadata: ScreencastFrameMetadata
     #: Frame number.
@@ -2689,7 +2672,7 @@ class ScreencastFrame:
     @classmethod
     def from_json(cls, json: T_JSON_DICT) -> ScreencastFrame:
         return cls(
-            data=str(json['data']),
+            data=bytes(json['data']),
             metadata=ScreencastFrameMetadata.from_json(json['metadata']),
             session_id=int(json['sessionId'])
         )
@@ -2749,12 +2732,12 @@ class CompilationCacheProduced:
     if Page.setGenerateCompilationCache is enabled.
     '''
     url: str
-    #: Base64-encoded data (Encoded as a base64 string when passed over JSON)
-    data: str
+    #: Base64-encoded data
+    data: bytes
 
     @classmethod
     def from_json(cls, json: T_JSON_DICT) -> CompilationCacheProduced:
         return cls(
             url=str(json['url']),
-            data=str(json['data'])
+            data=bytes(json['data'])
         )

@@ -672,12 +672,6 @@ class LayoutTreeSnapshot:
     #: The client rect of nodes. Only available when includeDOMRects is set to true
     client_rects: typing.Optional[typing.List[Rectangle]] = None
 
-    #: The list of background colors that are blended with colors of overlapping elements.
-    blended_background_colors: typing.Optional[typing.List[StringIndex]] = None
-
-    #: The list of computed text opacities.
-    text_color_opacities: typing.Optional[typing.List[float]] = None
-
     def to_json(self) -> T_JSON_DICT:
         json: T_JSON_DICT = dict()
         json['nodeIndex'] = [i for i in self.node_index]
@@ -693,10 +687,6 @@ class LayoutTreeSnapshot:
             json['scrollRects'] = [i.to_json() for i in self.scroll_rects]
         if self.client_rects is not None:
             json['clientRects'] = [i.to_json() for i in self.client_rects]
-        if self.blended_background_colors is not None:
-            json['blendedBackgroundColors'] = [i.to_json() for i in self.blended_background_colors]
-        if self.text_color_opacities is not None:
-            json['textColorOpacities'] = [i for i in self.text_color_opacities]
         return json
 
     @classmethod
@@ -711,8 +701,6 @@ class LayoutTreeSnapshot:
             offset_rects=[Rectangle.from_json(i) for i in json['offsetRects']] if 'offsetRects' in json else None,
             scroll_rects=[Rectangle.from_json(i) for i in json['scrollRects']] if 'scrollRects' in json else None,
             client_rects=[Rectangle.from_json(i) for i in json['clientRects']] if 'clientRects' in json else None,
-            blended_background_colors=[StringIndex.from_json(i) for i in json['blendedBackgroundColors']] if 'blendedBackgroundColors' in json else None,
-            text_color_opacities=[float(i) for i in json['textColorOpacities']] if 'textColorOpacities' in json else None,
         )
 
 
@@ -822,9 +810,7 @@ def get_snapshot(
 def capture_snapshot(
         computed_styles: typing.List[str],
         include_paint_order: typing.Optional[bool] = None,
-        include_dom_rects: typing.Optional[bool] = None,
-        include_blended_background_colors: typing.Optional[bool] = None,
-        include_text_color_opacities: typing.Optional[bool] = None
+        include_dom_rects: typing.Optional[bool] = None
     ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.Tuple[typing.List[DocumentSnapshot], typing.List[str]]]:
     '''
     Returns a document snapshot, including the full DOM tree of the root node (including iframes,
@@ -835,8 +821,6 @@ def capture_snapshot(
     :param computed_styles: Whitelist of computed styles to return.
     :param include_paint_order: *(Optional)* Whether to include layout object paint orders into the snapshot.
     :param include_dom_rects: *(Optional)* Whether to include DOM rectangles (offsetRects, clientRects, scrollRects) into the snapshot
-    :param include_blended_background_colors: **(EXPERIMENTAL)** *(Optional)* Whether to include blended background colors in the snapshot (default: false). Blended background color is achieved by blending background colors of all elements that overlap with the current element.
-    :param include_text_color_opacities: **(EXPERIMENTAL)** *(Optional)* Whether to include text color opacity in the snapshot (default: false). An element might have the opacity property set that affects the text color of the element. The final text color opacity is computed based on the opacity of all overlapping elements.
     :returns: A tuple with the following items:
 
         0. **documents** - The nodes in the DOM tree. The DOMNode at index 0 corresponds to the root document.
@@ -848,10 +832,6 @@ def capture_snapshot(
         params['includePaintOrder'] = include_paint_order
     if include_dom_rects is not None:
         params['includeDOMRects'] = include_dom_rects
-    if include_blended_background_colors is not None:
-        params['includeBlendedBackgroundColors'] = include_blended_background_colors
-    if include_text_color_opacities is not None:
-        params['includeTextColorOpacities'] = include_text_color_opacities
     cmd_dict: T_JSON_DICT = {
         'method': 'DOMSnapshot.captureSnapshot',
         'params': params,

@@ -1,8 +1,4 @@
 {
-    "version": {
-        "major": "1",
-        "minor": "3"
-    },
     "domains": [
         {
             "domain": "Accessibility",
@@ -1487,39 +1483,6 @@
                     ]
                 },
                 {
-                    "id": "AttributionReportingIssueType",
-                    "type": "string",
-                    "enum": [
-                        "PermissionPolicyDisabled"
-                    ]
-                },
-                {
-                    "id": "AttributionReportingIssueDetails",
-                    "description": "Details for issues around \"Attribution Reporting API\" usage.\nExplainer: https://github.com/WICG/conversion-measurement-api",
-                    "type": "object",
-                    "properties": [
-                        {
-                            "name": "violationType",
-                            "$ref": "AttributionReportingIssueType"
-                        },
-                        {
-                            "name": "frame",
-                            "optional": true,
-                            "$ref": "AffectedFrame"
-                        },
-                        {
-                            "name": "request",
-                            "optional": true,
-                            "$ref": "AffectedRequest"
-                        },
-                        {
-                            "name": "violatingNodeId",
-                            "optional": true,
-                            "$ref": "DOM.BackendNodeId"
-                        }
-                    ]
-                },
-                {
                     "id": "InspectorIssueCode",
                     "description": "A unique identifier for the type of issue. Each type may use one of the\noptional fields in InspectorIssueDetails to convey more specific\ninformation about the kind of issue.",
                     "type": "string",
@@ -1532,8 +1495,7 @@
                         "SharedArrayBufferIssue",
                         "TrustedWebActivityIssue",
                         "LowTextContrastIssue",
-                        "CorsIssue",
-                        "AttributionReportingIssue"
+                        "CorsIssue"
                     ]
                 },
                 {
@@ -1585,11 +1547,6 @@
                             "name": "corsIssueDetails",
                             "optional": true,
                             "$ref": "CorsIssueDetails"
-                        },
-                        {
-                            "name": "attributionReportingIssueDetails",
-                            "optional": true,
-                            "$ref": "AttributionReportingIssueDetails"
                         }
                     ]
                 },
@@ -1645,9 +1602,9 @@
                     "returns": [
                         {
                             "name": "body",
-                            "description": "The encoded body as a base64 string. Omitted if sizeOnly is true. (Encoded as a base64 string when passed over JSON)",
+                            "description": "The encoded body as a base64 string. Omitted if sizeOnly is true.",
                             "optional": true,
-                            "type": "string"
+                            "type": "binary"
                         },
                         {
                             "name": "originalSize",
@@ -2361,9 +2318,9 @@
                         },
                         {
                             "name": "image",
-                            "description": "Png encoded image. (Encoded as a base64 string when passed over JSON)",
+                            "description": "Png encoded image.",
                             "optional": true,
-                            "type": "string"
+                            "type": "binary"
                         }
                     ]
                 },
@@ -3833,8 +3790,8 @@
                     "properties": [
                         {
                             "name": "body",
-                            "description": "Entry content, base64-encoded. (Encoded as a base64 string when passed over JSON)",
-                            "type": "string"
+                            "description": "Entry content, base64-encoded.",
+                            "type": "binary"
                         }
                     ]
                 }
@@ -4301,8 +4258,7 @@
                         },
                         {
                             "name": "importedDocument",
-                            "description": "Deprecated, as the HTML Imports API has been removed (crbug.com/937746).\nThis property used to return the imported document for the HTMLImport links.\nThe property is always undefined now.",
-                            "deprecated": true,
+                            "description": "Import document for the HTMLImport links.",
                             "optional": true,
                             "$ref": "Node"
                         },
@@ -6593,26 +6549,6 @@
                             "items": {
                                 "$ref": "Rectangle"
                             }
-                        },
-                        {
-                            "name": "blendedBackgroundColors",
-                            "description": "The list of background colors that are blended with colors of overlapping elements.",
-                            "experimental": true,
-                            "optional": true,
-                            "type": "array",
-                            "items": {
-                                "$ref": "StringIndex"
-                            }
-                        },
-                        {
-                            "name": "textColorOpacities",
-                            "description": "The list of computed text opacities.",
-                            "experimental": true,
-                            "optional": true,
-                            "type": "array",
-                            "items": {
-                                "type": "number"
-                            }
                         }
                     ]
                 },
@@ -6745,20 +6681,6 @@
                         {
                             "name": "includeDOMRects",
                             "description": "Whether to include DOM rectangles (offsetRects, clientRects, scrollRects) into the snapshot",
-                            "optional": true,
-                            "type": "boolean"
-                        },
-                        {
-                            "name": "includeBlendedBackgroundColors",
-                            "description": "Whether to include blended background colors in the snapshot (default: false).\nBlended background color is achieved by blending background colors of all elements\nthat overlap with the current element.",
-                            "experimental": true,
-                            "optional": true,
-                            "type": "boolean"
-                        },
-                        {
-                            "name": "includeTextColorOpacities",
-                            "description": "Whether to include text color opacity in the snapshot (default: false).\nAn element might have the opacity property set that affects the text color of the element.\nThe final text color opacity is computed based on the opacity of all overlapping elements.",
-                            "experimental": true,
                             "optional": true,
                             "type": "boolean"
                         }
@@ -7252,7 +7174,6 @@
                     "type": "string",
                     "enum": [
                         "avif",
-                        "jxl",
                         "webp"
                     ]
                 }
@@ -7798,9 +7719,9 @@
                         },
                         {
                             "name": "screenshotData",
-                            "description": "Base64-encoded image data of the screenshot, if one was requested and successfully taken. (Encoded as a base64 string when passed over JSON)",
+                            "description": "Base64-encoded image data of the screenshot, if one was requested and successfully taken.",
                             "optional": true,
-                            "type": "string"
+                            "type": "binary"
                         }
                     ]
                 },
@@ -9160,8 +9081,8 @@
                         },
                         {
                             "name": "picture",
-                            "description": "Base64-encoded snapshot data. (Encoded as a base64 string when passed over JSON)",
-                            "type": "string"
+                            "description": "Base64-encoded snapshot data.",
+                            "type": "binary"
                         }
                     ]
                 },
@@ -10104,7 +10025,7 @@
                         {
                             "name": "bytes",
                             "optional": true,
-                            "type": "string"
+                            "type": "binary"
                         }
                     ]
                 },
@@ -11547,9 +11468,9 @@
                         },
                         {
                             "name": "rawResponse",
-                            "description": "If set the requests completes using with the provided base64 encoded raw response, including\nHTTP status line and headers etc... Must not be set in response to an authChallenge. (Encoded as a base64 string when passed over JSON)",
+                            "description": "If set the requests completes using with the provided base64 encoded raw response, including\nHTTP status line and headers etc... Must not be set in response to an authChallenge.",
                             "optional": true,
-                            "type": "string"
+                            "type": "binary"
                         },
                         {
                             "name": "url",
@@ -14599,16 +14520,6 @@
                             "type": "boolean"
                         }
                     ]
-                },
-                {
-                    "id": "NavigationType",
-                    "description": "The type of a frameNavigated event.",
-                    "experimental": true,
-                    "type": "string",
-                    "enum": [
-                        "Navigation",
-                        "BackForwardCacheRestore"
-                    ]
                 }
             ],
             "commands": [
@@ -14703,8 +14614,8 @@
                     "returns": [
                         {
                             "name": "data",
-                            "description": "Base64-encoded image data. (Encoded as a base64 string when passed over JSON)",
-                            "type": "string"
+                            "description": "Base64-encoded image data.",
+                            "type": "binary"
                         }
                     ]
                 },
@@ -14858,7 +14769,7 @@
                         {
                             "name": "primaryIcon",
                             "optional": true,
-                            "type": "string"
+                            "type": "binary"
                         }
                     ]
                 },
@@ -15185,8 +15096,8 @@
                     "returns": [
                         {
                             "name": "data",
-                            "description": "Base64-encoded pdf data. Empty if |returnAsStream| is specified. (Encoded as a base64 string when passed over JSON)",
-                            "type": "string"
+                            "description": "Base64-encoded pdf data. Empty if |returnAsStream| is specified.",
+                            "type": "binary"
                         },
                         {
                             "name": "stream",
@@ -15676,8 +15587,8 @@
                         },
                         {
                             "name": "data",
-                            "description": "Base64-encoded data (Encoded as a base64 string when passed over JSON)",
-                            "type": "string"
+                            "description": "Base64-encoded data",
+                            "type": "binary"
                         }
                     ]
                 },
@@ -15820,11 +15731,6 @@
                             "name": "frame",
                             "description": "Frame object.",
                             "$ref": "Frame"
-                        },
-                        {
-                            "name": "type",
-                            "experimental": true,
-                            "$ref": "NavigationType"
                         }
                     ]
                 },
@@ -16096,8 +16002,8 @@
                     "parameters": [
                         {
                             "name": "data",
-                            "description": "Base64-encoded compressed image. (Encoded as a base64 string when passed over JSON)",
-                            "type": "string"
+                            "description": "Base64-encoded compressed image.",
+                            "type": "binary"
                         },
                         {
                             "name": "metadata",
@@ -16163,8 +16069,8 @@
                         },
                         {
                             "name": "data",
-                            "description": "Base64-encoded data (Encoded as a base64 string when passed over JSON)",
-                            "type": "string"
+                            "description": "Base64-encoded data",
+                            "type": "binary"
                         }
                     ]
                 }
@@ -18566,9 +18472,9 @@
                         },
                         {
                             "name": "perfettoConfig",
-                            "description": "Base64-encoded serialized perfetto.protos.TraceConfig protobuf message\nWhen specified, the parameters `categories`, `options`, `traceConfig`\nare ignored. (Encoded as a base64 string when passed over JSON)",
+                            "description": "Base64-encoded serialized perfetto.protos.TraceConfig protobuf message\nWhen specified, the parameters `categories`, `options`, `traceConfig`\nare ignored.",
                             "optional": true,
-                            "type": "string"
+                            "type": "binary"
                         },
                         {
                             "name": "tracingBackend",
@@ -18838,15 +18744,15 @@
                         },
                         {
                             "name": "binaryResponseHeaders",
-                            "description": "Alternative way of specifying response headers as a \\0-separated\nseries of name: value pairs. Prefer the above method unless you\nneed to represent some non-UTF8 values that can't be transmitted\nover the protocol as text. (Encoded as a base64 string when passed over JSON)",
+                            "description": "Alternative way of specifying response headers as a \\0-separated\nseries of name: value pairs. Prefer the above method unless you\nneed to represent some non-UTF8 values that can't be transmitted\nover the protocol as text.",
                             "optional": true,
-                            "type": "string"
+                            "type": "binary"
                         },
                         {
                             "name": "body",
-                            "description": "A response body. (Encoded as a base64 string when passed over JSON)",
+                            "description": "A response body.",
                             "optional": true,
-                            "type": "string"
+                            "type": "binary"
                         },
                         {
                             "name": "responsePhrase",
@@ -18879,9 +18785,9 @@
                         },
                         {
                             "name": "postData",
-                            "description": "If set, overrides the post data in the request. (Encoded as a base64 string when passed over JSON)",
+                            "description": "If set, overrides the post data in the request.",
                             "optional": true,
-                            "type": "string"
+                            "type": "binary"
                         },
                         {
                             "name": "headers",
@@ -19593,7 +19499,7 @@
                     "properties": [
                         {
                             "name": "credentialId",
-                            "type": "string"
+                            "type": "binary"
                         },
                         {
                             "name": "isResidentCredential",
@@ -19607,14 +19513,14 @@
                         },
                         {
                             "name": "privateKey",
-                            "description": "The ECDSA P-256 private key in PKCS#8 format. (Encoded as a base64 string when passed over JSON)",
-                            "type": "string"
+                            "description": "The ECDSA P-256 private key in PKCS#8 format.",
+                            "type": "binary"
                         },
                         {
                             "name": "userHandle",
-                            "description": "An opaque byte sequence with a maximum size of 64 bytes mapping the\ncredential to a specific user. (Encoded as a base64 string when passed over JSON)",
+                            "description": "An opaque byte sequence with a maximum size of 64 bytes mapping the\ncredential to a specific user.",
                             "optional": true,
-                            "type": "string"
+                            "type": "binary"
                         },
                         {
                             "name": "signCount",
@@ -19623,9 +19529,9 @@
                         },
                         {
                             "name": "largeBlob",
-                            "description": "The large blob associated with the credential.\nSee https://w3c.github.io/webauthn/#sctn-large-blob-extension (Encoded as a base64 string when passed over JSON)",
+                            "description": "The large blob associated with the credential.\nSee https://w3c.github.io/webauthn/#sctn-large-blob-extension",
                             "optional": true,
-                            "type": "string"
+                            "type": "binary"
                         }
                     ]
                 }
@@ -19689,7 +19595,7 @@
                         },
                         {
                             "name": "credentialId",
-                            "type": "string"
+                            "type": "binary"
                         }
                     ],
                     "returns": [
@@ -19728,7 +19634,7 @@
                         },
                         {
                             "name": "credentialId",
-                            "type": "string"
+                            "type": "binary"
                         }
                     ]
                 },
@@ -20477,9 +20383,9 @@
                         },
                         {
                             "name": "bytecode",
-                            "description": "Wasm bytecode. (Encoded as a base64 string when passed over JSON)",
+                            "description": "Wasm bytecode.",
                             "optional": true,
-                            "type": "string"
+                            "type": "binary"
                         }
                     ]
                 },
@@ -20497,8 +20403,8 @@
                     "returns": [
                         {
                             "name": "bytecode",
-                            "description": "Script source. (Encoded as a base64 string when passed over JSON)",
-                            "type": "string"
+                            "description": "Script source.",
+                            "type": "binary"
                         }
                     ]
                 },
@@ -23526,5 +23432,9 @@
                 }
             ]
         }
-    ]
+    ],
+    "version": {
+        "major": "1",
+        "minor": "3"
+    }
 }

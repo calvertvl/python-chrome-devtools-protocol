@@ -185,7 +185,6 @@ class DisabledImageType(enum.Enum):
     Enum of image types that can be disabled.
     '''
     AVIF = "avif"
-    JXL = "jxl"
     WEBP = "webp"
 
     def to_json(self) -> str:

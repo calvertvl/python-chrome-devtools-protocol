@@ -604,7 +604,7 @@ def set_window_bounds(
 
 def set_dock_tile(
         badge_label: typing.Optional[str] = None,
-        image: typing.Optional[str] = None
+        image: typing.Optional[bytes] = None
     ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,None]:
     '''
     Set dock tile details, platform-specific.
@@ -612,7 +612,7 @@ def set_dock_tile(
     **EXPERIMENTAL**
 
     :param badge_label: *(Optional)*
-    :param image: *(Optional)* Png encoded image. (Encoded as a base64 string when passed over JSON)
+    :param image: *(Optional)* Png encoded image.
     '''
     params: T_JSON_DICT = dict()
     if badge_label is not None:

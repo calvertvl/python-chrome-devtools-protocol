@@ -125,12 +125,12 @@ class VirtualAuthenticatorOptions:
 
 @dataclass
 class Credential:
-    credential_id: str
+    credential_id: bytes
 
     is_resident_credential: bool
 
-    #: The ECDSA P-256 private key in PKCS#8 format. (Encoded as a base64 string when passed over JSON)
-    private_key: str
+    #: The ECDSA P-256 private key in PKCS#8 format.
+    private_key: bytes
 
     #: Signature counter. This is incremented by one for each successful
     #: assertion.
@@ -142,12 +142,12 @@ class Credential:
     rp_id: typing.Optional[str] = None
 
     #: An opaque byte sequence with a maximum size of 64 bytes mapping the
-    #: credential to a specific user. (Encoded as a base64 string when passed over JSON)
-    user_handle: typing.Optional[str] = None
+    #: credential to a specific user.
+    user_handle: typing.Optional[bytes] = None
 
     #: The large blob associated with the credential.
-    #: See https://w3c.github.io/webauthn/#sctn-large-blob-extension (Encoded as a base64 string when passed over JSON)
-    large_blob: typing.Optional[str] = None
+    #: See https://w3c.github.io/webauthn/#sctn-large-blob-extension
+    large_blob: typing.Optional[bytes] = None
 
     def to_json(self) -> T_JSON_DICT:
         json: T_JSON_DICT = dict()
@@ -166,13 +166,13 @@ class Credential:
     @classmethod
     def from_json(cls, json: T_JSON_DICT) -> Credential:
         return cls(
-            credential_id=str(json['credentialId']),
+            credential_id=bytes(json['credentialId']),
             is_resident_credential=bool(json['isResidentCredential']),
-            private_key=str(json['privateKey']),
+            private_key=bytes(json['privateKey']),
             sign_count=int(json['signCount']),
             rp_id=str(json['rpId']) if 'rpId' in json else None,
-            user_handle=str(json['userHandle']) if 'userHandle' in json else None,
-            large_blob=str(json['largeBlob']) if 'largeBlob' in json else None,
+            user_handle=bytes(json['userHandle']) if 'userHandle' in json else None,
+            large_blob=bytes(json['largeBlob']) if 'largeBlob' in json else None,
         )
 
 
@@ -255,7 +255,7 @@ def add_credential(
 
 def get_credential(
         authenticator_id: AuthenticatorId,
-        credential_id: str
+        credential_id: bytes
     ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,Credential]:
     '''
     Returns a single credential stored in the given virtual authenticator that
@@ -297,7 +297,7 @@ def get_credentials(
 
 def remove_credential(
         authenticator_id: AuthenticatorId,
-        credential_id: str
+        credential_id: bytes
     ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,None]:
     '''
     Removes a credential from the authenticator.

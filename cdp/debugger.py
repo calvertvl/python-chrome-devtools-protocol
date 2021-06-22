@@ -464,7 +464,7 @@ def get_possible_breakpoints(
 
 def get_script_source(
         script_id: runtime.ScriptId
-    ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.Tuple[str, typing.Optional[str]]]:
+    ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.Tuple[str, typing.Optional[bytes]]]:
     '''
     Returns source for the script with given id.
 
@@ -472,7 +472,7 @@ def get_script_source(
     :returns: A tuple with the following items:
 
         0. **scriptSource** - Script source (empty in case of Wasm bytecode).
-        1. **bytecode** - *(Optional)* Wasm bytecode. (Encoded as a base64 string when passed over JSON)
+        1. **bytecode** - *(Optional)* Wasm bytecode.
     '''
     params: T_JSON_DICT = dict()
     params['scriptId'] = script_id.to_json()
@@ -483,21 +483,21 @@ def get_script_source(
     json = yield cmd_dict
     return (
         str(json['scriptSource']),
-        str(json['bytecode']) if 'bytecode' in json else None
+        bytes(json['bytecode']) if 'bytecode' in json else None
     )
 
 
 @deprecated(version="1.3")
 def get_wasm_bytecode(
         script_id: runtime.ScriptId
-    ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,str]:
+    ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,bytes]:
     '''
     This command is deprecated. Use getScriptSource instead.
 
     .. deprecated:: 1.3
 
     :param script_id: Id of the Wasm script to get source for.
-    :returns: Script source. (Encoded as a base64 string when passed over JSON)
+    :returns: Script source.
     '''
     params: T_JSON_DICT = dict()
     params['scriptId'] = script_id.to_json()
@@ -506,7 +506,7 @@ def get_wasm_bytecode(
         'params': params,
     }
     json = yield cmd_dict
-    return str(json['bytecode'])
+    return bytes(json['bytecode'])
 
 
 def get_stack_trace(

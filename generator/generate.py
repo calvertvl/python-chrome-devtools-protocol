@@ -130,6 +130,7 @@ class CdpPrimitiveType(Enum):
     number = 'float'
     object = 'dict'
     string = 'str'
+    binary = 'bytes'
 
     @classmethod
     def get_annotation(cls, cdp_type):
@@ -988,6 +989,21 @@ def main():
                 if event.name == 'screencastVisibilityChanged':
                     # Patch 2
                     event.description = event.description.replace('`', '')
+        elif domain.domain == 'Network':
+            for typ in domain.types:
+                if typ.id == 'LoadNetworkResourcePageResult':
+                    # Patch 3
+                    typ.properties[5].ref = 'Headers'
+        elif domain.domain == 'Debugger':
+            for event in domain.events:
+                if event.name == 'scriptParsed':
+                    # Patch 4
+                    event.parameters[16].ref = 'ScriptLanguage'
+                    # Patch 5
+                    event.parameters[17].ref = 'DebugSymbols'
+                elif event.name == 'scriptFailedToParse':
+                    # Patch 6
+                    event.parameters[15].ref = 'ScriptLanguage'
 
     for domain in domains:
         logger.info('Generating module: %s → %s.py', domain.domain,

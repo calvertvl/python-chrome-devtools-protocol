@@ -117,8 +117,8 @@ class PictureTile:
     #: Offset from owning layer top boundary
     y: float
 
-    #: Base64-encoded snapshot data. (Encoded as a base64 string when passed over JSON)
-    picture: str
+    #: Base64-encoded snapshot data.
+    picture: bytes
 
     def to_json(self) -> T_JSON_DICT:
         json: T_JSON_DICT = dict()
@@ -132,7 +132,7 @@ class PictureTile:
         return cls(
             x=float(json['x']),
             y=float(json['y']),
-            picture=str(json['picture']),
+            picture=bytes(json['picture']),
         )
 
 

@@ -370,7 +370,7 @@ class PostDataEntry:
     '''
     Post data entry for HTTP request
     '''
-    bytes_: typing.Optional[str] = None
+    bytes_: typing.Optional[bytes] = None
 
     def to_json(self) -> T_JSON_DICT:
         json: T_JSON_DICT = dict()
@@ -381,7 +381,7 @@ class PostDataEntry:
     @classmethod
     def from_json(cls, json: T_JSON_DICT) -> PostDataEntry:
         return cls(
-            bytes_=str(json['bytes']) if 'bytes' in json else None,
+            bytes_=bytes(json['bytes']) if 'bytes' in json else None,
         )
 
 
@@ -2063,7 +2063,7 @@ def clear_browser_cookies() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,None]:
 def continue_intercepted_request(
         interception_id: InterceptionId,
         error_reason: typing.Optional[ErrorReason] = None,
-        raw_response: typing.Optional[str] = None,
+        raw_response: typing.Optional[bytes] = None,
         url: typing.Optional[str] = None,
         method: typing.Optional[str] = None,
         post_data: typing.Optional[str] = None,
@@ -2083,7 +2083,7 @@ def continue_intercepted_request(
 
     :param interception_id:
     :param error_reason: *(Optional)* If set this causes the request to fail with the given reason. Passing ```Aborted```` for requests marked with ````isNavigationRequest``` also cancels the navigation. Must not be set in response to an authChallenge.
-    :param raw_response: *(Optional)* If set the requests completes using with the provided base64 encoded raw response, including HTTP status line and headers etc... Must not be set in response to an authChallenge. (Encoded as a base64 string when passed over JSON)
+    :param raw_response: *(Optional)* If set the requests completes using with the provided base64 encoded raw response, including HTTP status line and headers etc... Must not be set in response to an authChallenge.
     :param url: *(Optional)* If set the request url will be modified in a way that's not observable by page. Must not be set in response to an authChallenge.
     :param method: *(Optional)* If set this allows the request method to be overridden. Must not be set in response to an authChallenge.
     :param post_data: *(Optional)* If set this allows postData to be set. Must not be set in response to an authChallenge.

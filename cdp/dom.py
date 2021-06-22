@@ -207,9 +207,7 @@ class Node:
     #: Pseudo elements associated with this node.
     pseudo_elements: typing.Optional[typing.List[Node]] = None
 
-    #: Deprecated, as the HTML Imports API has been removed (crbug.com/937746).
-    #: This property used to return the imported document for the HTMLImport links.
-    #: The property is always undefined now.
+    #: Import document for the HTMLImport links.
     imported_document: typing.Optional[Node] = None
 
     #: Distributed nodes for given insertion point.

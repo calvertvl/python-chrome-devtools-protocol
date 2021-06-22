@@ -653,52 +653,6 @@ class CorsIssueDetails:
         )
 
 
-class AttributionReportingIssueType(enum.Enum):
-    PERMISSION_POLICY_DISABLED = "PermissionPolicyDisabled"
-
-    def to_json(self) -> str:
-        return self.value
-
-    @classmethod
-    def from_json(cls, json: str) -> AttributionReportingIssueType:
-        return cls(json)
-
-
-@dataclass
-class AttributionReportingIssueDetails:
-    '''
-    Details for issues around "Attribution Reporting API" usage.
-    Explainer: https://github.com/WICG/conversion-measurement-api
-    '''
-    violation_type: AttributionReportingIssueType
-
-    frame: typing.Optional[AffectedFrame] = None
-
-    request: typing.Optional[AffectedRequest] = None
-
-    violating_node_id: typing.Optional[dom.BackendNodeId] = None
-
-    def to_json(self) -> T_JSON_DICT:
-        json: T_JSON_DICT = dict()
-        json['violationType'] = self.violation_type.to_json()
-        if self.frame is not None:
-            json['frame'] = self.frame.to_json()
-        if self.request is not None:
-            json['request'] = self.request.to_json()
-        if self.violating_node_id is not None:
-            json['violatingNodeId'] = self.violating_node_id.to_json()
-        return json
-
-    @classmethod
-    def from_json(cls, json: T_JSON_DICT) -> AttributionReportingIssueDetails:
-        return cls(
-            violation_type=AttributionReportingIssueType.from_json(json['violationType']),
-            frame=AffectedFrame.from_json(json['frame']) if 'frame' in json else None,
-            request=AffectedRequest.from_json(json['request']) if 'request' in json else None,
-            violating_node_id=dom.BackendNodeId.from_json(json['violatingNodeId']) if 'violatingNodeId' in json else None,
-        )
-
-
 class InspectorIssueCode(enum.Enum):
     '''
     A unique identifier for the type of issue. Each type may use one of the
@@ -714,7 +668,6 @@ class InspectorIssueCode(enum.Enum):
     TRUSTED_WEB_ACTIVITY_ISSUE = "TrustedWebActivityIssue"
     LOW_TEXT_CONTRAST_ISSUE = "LowTextContrastIssue"
     CORS_ISSUE = "CorsIssue"
-    ATTRIBUTION_REPORTING_ISSUE = "AttributionReportingIssue"
 
     def to_json(self) -> str:
         return self.value
@@ -749,8 +702,6 @@ class InspectorIssueDetails:
 
     cors_issue_details: typing.Optional[CorsIssueDetails] = None
 
-    attribution_reporting_issue_details: typing.Optional[AttributionReportingIssueDetails] = None
-
     def to_json(self) -> T_JSON_DICT:
         json: T_JSON_DICT = dict()
         if self.same_site_cookie_issue_details is not None:
@@ -771,8 +722,6 @@ class InspectorIssueDetails:
             json['lowTextContrastIssueDetails'] = self.low_text_contrast_issue_details.to_json()
         if self.cors_issue_details is not None:
             json['corsIssueDetails'] = self.cors_issue_details.to_json()
-        if self.attribution_reporting_issue_details is not None:
-            json['attributionReportingIssueDetails'] = self.attribution_reporting_issue_details.to_json()
         return json
 
     @classmethod
@@ -787,7 +736,6 @@ class InspectorIssueDetails:
             twa_quality_enforcement_details=TrustedWebActivityIssueDetails.from_json(json['twaQualityEnforcementDetails']) if 'twaQualityEnforcementDetails' in json else None,
             low_text_contrast_issue_details=LowTextContrastIssueDetails.from_json(json['lowTextContrastIssueDetails']) if 'lowTextContrastIssueDetails' in json else None,
             cors_issue_details=CorsIssueDetails.from_json(json['corsIssueDetails']) if 'corsIssueDetails' in json else None,
-            attribution_reporting_issue_details=AttributionReportingIssueDetails.from_json(json['attributionReportingIssueDetails']) if 'attributionReportingIssueDetails' in json else None,
         )
 
 
@@ -819,7 +767,7 @@ def get_encoded_response(
         encoding: str,
         quality: typing.Optional[float] = None,
         size_only: typing.Optional[bool] = None
-    ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.Tuple[typing.Optional[str], int, int]]:
+    ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.Tuple[typing.Optional[bytes], int, int]]:
     '''
     Returns the response body and size if it were re-encoded with the specified settings. Only
     applies to images.
@@ -830,7 +778,7 @@ def get_encoded_response(
     :param size_only: *(Optional)* Whether to only return the size information (defaults to false).
     :returns: A tuple with the following items:
 
-        0. **body** - *(Optional)* The encoded body as a base64 string. Omitted if sizeOnly is true. (Encoded as a base64 string when passed over JSON)
+        0. **body** - *(Optional)* The encoded body as a base64 string. Omitted if sizeOnly is true.
         1. **originalSize** - Size before re-encoding.
         2. **encodedSize** - Size after re-encoding.
     '''
@@ -847,7 +795,7 @@ def get_encoded_response(
     }
     json = yield cmd_dict
     return (
-        str(json['body']) if 'body' in json else None,
+        bytes(json['body']) if 'body' in json else None,
         int(json['originalSize']),
         int(json['encodedSize'])
     )
