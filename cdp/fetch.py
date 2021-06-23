@@ -241,7 +241,7 @@ def fulfill_request(
     :param request_id: An id the client received in requestPaused event.
     :param response_code: An HTTP response code.
     :param response_headers: *(Optional)* Response headers.
-    :param binary_response_headers: *(Optional)* Alternative way of specifying response headers as a \0-separated series of name: value pairs. Prefer the above method unless you need to represent some non-UTF8 values that can't be transmitted over the protocol as text.
+    :param binary_response_headers: *(Optional)* Alternative way of specifying response headers as a NUL-separated series of name: value pairs. Prefer the above method unless you need to represent some non-UTF8 values that can't be transmitted over the protocol as text.
     :param body: *(Optional)* A response body.
     :param response_phrase: *(Optional)* A textual representation of responseCode. If absent, a standard phrase matching responseCode is used.
     '''
