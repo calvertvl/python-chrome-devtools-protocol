@@ -1004,6 +1004,11 @@ def main():
                 elif event.name == 'scriptFailedToParse':
                     # Patch 6
                     event.parameters[15].ref = 'ScriptLanguage'
+        elif domain.domain == "Fetch":
+            for cmd in domain.commands:
+                if cmd.name == "fulfillRequest":
+                    # Patch 7 - code generators don't handle \0 in docstrings very well
+                    cmd.parameters[3].description = cmd.parameters[3].description.replace("\\0", "NUL")
 
     for domain in domains:
         logger.info('Generating module: %s → %s.py', domain.domain,
