@@ -370,7 +370,7 @@ class PostDataEntry:
     '''
     Post data entry for HTTP request
     '''
-    bytes_: typing.Optional[bytes] = None
+    bytes_: typing.Optional[str] = None
 
     def to_json(self) -> T_JSON_DICT:
         json: T_JSON_DICT = dict()
@@ -381,7 +381,7 @@ class PostDataEntry:
     @classmethod
     def from_json(cls, json: T_JSON_DICT) -> PostDataEntry:
         return cls(
-            bytes_=bytes(json['bytes']) if 'bytes' in json else None,
+            bytes_=str(json['bytes']) if 'bytes' in json else None,
         )
 
 
@@ -2063,7 +2063,7 @@ def clear_browser_cookies() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,None]:
 def continue_intercepted_request(
         interception_id: InterceptionId,
         error_reason: typing.Optional[ErrorReason] = None,
-        raw_response: typing.Optional[bytes] = None,
+        raw_response: typing.Optional[str] = None,
         url: typing.Optional[str] = None,
         method: typing.Optional[str] = None,
         post_data: typing.Optional[str] = None,

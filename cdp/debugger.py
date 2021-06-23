@@ -464,7 +464,7 @@ def get_possible_breakpoints(
 
 def get_script_source(
         script_id: runtime.ScriptId
-    ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.Tuple[str, typing.Optional[bytes]]]:
+    ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.Tuple[str, typing.Optional[str]]]:
     '''
     Returns source for the script with given id.
 
@@ -483,14 +483,14 @@ def get_script_source(
     json = yield cmd_dict
     return (
         str(json['scriptSource']),
-        bytes(json['bytecode']) if 'bytecode' in json else None
+        str(json['bytecode']) if 'bytecode' in json else None
     )
 
 
 @deprecated(version="1.3")
 def get_wasm_bytecode(
         script_id: runtime.ScriptId
-    ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,bytes]:
+    ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,str]:
     '''
     This command is deprecated. Use getScriptSource instead.
 
@@ -506,7 +506,7 @@ def get_wasm_bytecode(
         'params': params,
     }
     json = yield cmd_dict
-    return bytes(json['bytecode'])
+    return str(json['bytecode'])
 
 
 def get_stack_trace(

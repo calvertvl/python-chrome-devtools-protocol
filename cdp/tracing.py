@@ -236,7 +236,7 @@ def start(
         stream_format: typing.Optional[StreamFormat] = None,
         stream_compression: typing.Optional[StreamCompression] = None,
         trace_config: typing.Optional[TraceConfig] = None,
-        perfetto_config: typing.Optional[bytes] = None,
+        perfetto_config: typing.Optional[str] = None,
         tracing_backend: typing.Optional[TracingBackend] = None
     ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,None]:
     '''

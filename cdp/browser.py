@@ -604,7 +604,7 @@ def set_window_bounds(
 
 def set_dock_tile(
         badge_label: typing.Optional[str] = None,
-        image: typing.Optional[bytes] = None
+        image: typing.Optional[str] = None
     ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,None]:
     '''
     Set dock tile details, platform-specific.

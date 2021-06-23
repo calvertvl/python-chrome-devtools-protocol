@@ -130,7 +130,7 @@ class CdpPrimitiveType(Enum):
     number = 'float'
     object = 'dict'
     string = 'str'
-    binary = 'bytes'
+    binary = 'str'
 
     @classmethod
     def get_annotation(cls, cdp_type):

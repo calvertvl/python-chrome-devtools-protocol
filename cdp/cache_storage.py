@@ -157,7 +157,7 @@ class CachedResponse:
     Cached response
     '''
     #: Entry content, base64-encoded.
-    body: bytes
+    body: str
 
     def to_json(self) -> T_JSON_DICT:
         json: T_JSON_DICT = dict()
@@ -167,7 +167,7 @@ class CachedResponse:
     @classmethod
     def from_json(cls, json: T_JSON_DICT) -> CachedResponse:
         return cls(
-            body=bytes(json['body']),
+            body=str(json['body']),
         )
 
 

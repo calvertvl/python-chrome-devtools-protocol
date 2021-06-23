@@ -1038,7 +1038,7 @@ def capture_screenshot(
         clip: typing.Optional[Viewport] = None,
         from_surface: typing.Optional[bool] = None,
         capture_beyond_viewport: typing.Optional[bool] = None
-    ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,bytes]:
+    ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,str]:
     '''
     Capture page screenshot.
 
@@ -1065,7 +1065,7 @@ def capture_screenshot(
         'params': params,
     }
     json = yield cmd_dict
-    return bytes(json['data'])
+    return str(json['data'])
 
 
 def capture_snapshot(
@@ -1244,7 +1244,7 @@ def get_installability_errors() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typi
     return [InstallabilityError.from_json(i) for i in json['installabilityErrors']]
 
 
-def get_manifest_icons() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.Optional[bytes]]:
+def get_manifest_icons() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.Optional[str]]:
     '''
 
 
@@ -1256,7 +1256,7 @@ def get_manifest_icons() -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.Opti
         'method': 'Page.getManifestIcons',
     }
     json = yield cmd_dict
-    return bytes(json['primaryIcon']) if 'primaryIcon' in json else None
+    return str(json['primaryIcon']) if 'primaryIcon' in json else None
 
 
 @deprecated(version="1.3")
@@ -1490,7 +1490,7 @@ def print_to_pdf(
         footer_template: typing.Optional[str] = None,
         prefer_css_page_size: typing.Optional[bool] = None,
         transfer_mode: typing.Optional[str] = None
-    ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.Tuple[bytes, typing.Optional[io.StreamHandle]]]:
+    ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.Tuple[str, typing.Optional[io.StreamHandle]]]:
     '''
     Print page as PDF.
 
@@ -1554,7 +1554,7 @@ def print_to_pdf(
     }
     json = yield cmd_dict
     return (
-        bytes(json['data']),
+        str(json['data']),
         io.StreamHandle.from_json(json['stream']) if 'stream' in json else None
     )
 
@@ -2137,7 +2137,7 @@ def produce_compilation_cache(
 
 def add_compilation_cache(
         url: str,
-        data: bytes
+        data: str
     ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,None]:
     '''
     Seeds compilation cache for given url. Compilation cache does not survive
@@ -2663,7 +2663,7 @@ class ScreencastFrame:
     Compressed image data requested by the ``startScreencast``.
     '''
     #: Base64-encoded compressed image.
-    data: bytes
+    data: str
     #: Screencast frame metadata.
     metadata: ScreencastFrameMetadata
     #: Frame number.
@@ -2672,7 +2672,7 @@ class ScreencastFrame:
     @classmethod
     def from_json(cls, json: T_JSON_DICT) -> ScreencastFrame:
         return cls(
-            data=bytes(json['data']),
+            data=str(json['data']),
             metadata=ScreencastFrameMetadata.from_json(json['metadata']),
             session_id=int(json['sessionId'])
         )
@@ -2733,11 +2733,11 @@ class CompilationCacheProduced:
     '''
     url: str
     #: Base64-encoded data
-    data: bytes
+    data: str
 
     @classmethod
     def from_json(cls, json: T_JSON_DICT) -> CompilationCacheProduced:
         return cls(
             url=str(json['url']),
-            data=bytes(json['data'])
+            data=str(json['data'])
         )

@@ -767,7 +767,7 @@ def get_encoded_response(
         encoding: str,
         quality: typing.Optional[float] = None,
         size_only: typing.Optional[bool] = None
-    ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.Tuple[typing.Optional[bytes], int, int]]:
+    ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,typing.Tuple[typing.Optional[str], int, int]]:
     '''
     Returns the response body and size if it were re-encoded with the specified settings. Only
     applies to images.
@@ -795,7 +795,7 @@ def get_encoded_response(
     }
     json = yield cmd_dict
     return (
-        bytes(json['body']) if 'body' in json else None,
+        str(json['body']) if 'body' in json else None,
         int(json['originalSize']),
         int(json['encodedSize'])
     )

@@ -231,8 +231,8 @@ def fulfill_request(
         request_id: RequestId,
         response_code: int,
         response_headers: typing.Optional[typing.List[HeaderEntry]] = None,
-        binary_response_headers: typing.Optional[bytes] = None,
-        body: typing.Optional[bytes] = None,
+        binary_response_headers: typing.Optional[str] = None,
+        body: typing.Optional[str] = None,
         response_phrase: typing.Optional[str] = None
     ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,None]:
     '''
@@ -267,7 +267,7 @@ def continue_request(
         request_id: RequestId,
         url: typing.Optional[str] = None,
         method: typing.Optional[str] = None,
-        post_data: typing.Optional[bytes] = None,
+        post_data: typing.Optional[str] = None,
         headers: typing.Optional[typing.List[HeaderEntry]] = None
     ) -> typing.Generator[T_JSON_DICT,T_JSON_DICT,None]:
     '''
